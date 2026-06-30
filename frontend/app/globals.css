@@ -26,14 +26,10 @@
   --color-surface-950: #09090b;
 }
 
-/*
-  Tailwind v4 @theme defines design tokens for utility classes (bg-surface-950 etc.)
-  but does NOT emit CSS custom properties automatically.
-  We need :root vars for the body declaration below.
-*/
 :root {
   --color-surface-950: #09090b;
   --color-surface-100: #f4f4f5;
+  --color-surface-500: #71717a;
   --color-surface-700: #3f3f46;
   --color-surface-600: #52525b;
   --color-brand-600: #059669;

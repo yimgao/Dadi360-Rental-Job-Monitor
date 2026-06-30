@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, ListOrdered, Settings, ScrollText, LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, ListOrdered, Settings, ScrollText, Info } from "lucide-react";
 
 const links = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -17,13 +17,19 @@ export function Nav() {
   return (
     <header className="sticky top-0 z-50 border-b border-surface-800 bg-surface-950/80 backdrop-blur-xl">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-8">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
-            <Home size={14} className="text-white" />
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
           </div>
-          <span className="font-bold text-base tracking-tight text-surface-100">
-            dadi360
-          </span>
+          <div>
+            <span className="font-bold text-base tracking-tight text-surface-100">聚职住</span>
+            <span className="text-[10px] text-surface-500 ml-1.5 font-mono">JobPulse</span>
+          </div>
         </Link>
         <nav className="flex gap-1">
           {links.map((l) => {
@@ -46,9 +52,17 @@ export function Nav() {
           })}
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          <span className="text-xs text-surface-600 bg-surface-900 px-2 py-1 rounded-md font-mono">
-            v0.2
-          </span>
+          <Link
+            href="/about"
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${
+              path === "/about"
+                ? "bg-brand-500/10 text-brand-400 ring-1 ring-brand-500/20"
+                : "text-surface-500 hover:text-surface-300"
+            }`}
+          >
+            <Info size={14} />
+            About
+          </Link>
         </div>
       </div>
     </header>

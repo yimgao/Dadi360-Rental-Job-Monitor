@@ -39,12 +39,12 @@
   },
   "us168_restaurant_jobs": {
     "enabled": true,
-    "max_pages": 10,
+    "max_pages": 30,
     "search_terms": ["餐厅", "餐馆", "厨师", "企台", "收银", "炒锅", "厨房", "奶茶", "寿司"]
   },
   "us168_nail_jobs": {
     "enabled": true,
-    "max_pages": 10,
+    "max_pages": 30,
     "search_terms": ["美甲", "指甲", "nail", "甲店", "美甲师", "按摩"]
   }
 }

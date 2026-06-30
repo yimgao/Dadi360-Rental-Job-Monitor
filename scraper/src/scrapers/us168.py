@@ -22,7 +22,7 @@ from ..email import EmailSender
 
 DOMAIN = "https://www.us168168.com"
 REQ_DELAY = 1.5
-MAX_PAGES = 10
+MAX_PAGES = 20
 DAYS_BACK = 4
 
 
