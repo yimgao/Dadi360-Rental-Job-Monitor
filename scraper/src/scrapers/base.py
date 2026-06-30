@@ -117,8 +117,13 @@ class BaseScraper(ABC):
 
     # ── public entry points ─────────────────────────────────────────
 
-    def scrape_all_pages(self) -> list[dict[str, str]]:
-        """Scrape every configured page and return matched listings."""
+    def scrape_all_pages(self, fetch_desc: bool = False) -> list[dict[str, str]]:
+        """Scrape every configured page and return matched listings.
+
+        Args:
+            fetch_desc: If True, also fetch the full post body for each
+                        listing (adds ~2s per listing). Off by default.
+        """
         forum_id = self.get_forum_id()
         max_pages = self.cfg.get("max_pages", 5)
         all_listings: list[dict[str, str]] = []
@@ -130,10 +135,10 @@ class BaseScraper(ABC):
                 all_listings.extend(self.parse_listings(html))
                 time.sleep(REQ_DELAY)
 
-        # fetch descriptions for every listing
-        for listing in all_listings:
-            listing["description"] = self.fetch_description(listing["link"])
-            time.sleep(REQ_DELAY)
+        if fetch_desc:
+            for listing in all_listings:
+                listing["description"] = self.fetch_description(listing["link"])
+                time.sleep(REQ_DELAY)
 
         return all_listings
 
