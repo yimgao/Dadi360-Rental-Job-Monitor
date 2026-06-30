@@ -22,7 +22,7 @@
   },
   "restaurant_jobs": {
     "enabled": true,
-    "forum_id": 56,
+    "forum_id": 57,
     "max_pages": 5,
     "send_interval_minutes": 10,
     "search_terms": ["餐厅", "餐馆", "厨师", "企台", "收银", "服务员"]
