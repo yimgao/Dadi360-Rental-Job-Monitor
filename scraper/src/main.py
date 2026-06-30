@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 
 from .db import DB
 from .email import EmailSender
-from .scrapers import RentalScraper, NailScraper, RestaurantScraper, Worker168Scraper
+from .scrapers import RentalScraper, NailScraper, RestaurantScraper, Worker168Scraper, Us168Scraper
 
 load_dotenv()
 
@@ -39,6 +39,8 @@ def get_scraper(category: str, config: dict, db: DB | None, email: EmailSender |
         "restaurant_jobs": RestaurantScraper,
         "168worker_restaurant_jobs": Worker168Scraper,
         "168worker_nail_jobs": Worker168Scraper,
+        "us168_restaurant_jobs": Us168Scraper,
+        "us168_nail_jobs": Us168Scraper,
     }
     cls = cls_map.get(category)
     if cls is None:
@@ -82,7 +84,7 @@ def main() -> None:
 
     categories = [args.category] if args.category else [k for k, v in config.items() if isinstance(v, dict) and v.get("enabled", True)]
     # filter out non-category keys
-    valid = {"rental", "nail_jobs", "restaurant_jobs", "168worker_restaurant_jobs", "168worker_nail_jobs"}
+    valid = {"rental", "nail_jobs", "restaurant_jobs", "168worker_restaurant_jobs", "168worker_nail_jobs", "us168_restaurant_jobs", "us168_nail_jobs"}
     categories = [c for c in categories if c in valid]
 
     def run_all() -> None:

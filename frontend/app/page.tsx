@@ -73,7 +73,7 @@ export default function Dashboard() {
 
       // source breakdown per category
       const src: Record<string, number> = {};
-      for (const s of ["dadi360", "168worker"]) {
+      for (const s of ["dadi360", "168worker", "us168168"]) {
         const { count } = await db
           .from("listings")
           .select("*", { count: "exact", head: true })
@@ -130,6 +130,7 @@ export default function Dashboard() {
           <div className="flex gap-2 mt-1.5 justify-end text-[11px]">
             <span className="text-emerald-400">● dadi360 {sourceCounts.dadi360 ?? "—"}</span>
             <span className="text-violet-400">● 168worker {sourceCounts["168worker"] ?? "—"}</span>
+            <span className="text-orange-400">● us168 {sourceCounts["us168168"] ?? "—"}</span>
           </div>
         </div>
       </div>
