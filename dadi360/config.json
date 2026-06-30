@@ -1,0 +1,34 @@
+{
+  "EMAIL": {
+    "SENDER_EMAIL": "g1097420948@gmail.com",
+    "SENDER_PASSWORD": "yjfj mcsk oinl tsxv",
+    "RECEIVER_EMAIL": "kaiyihe01@gmail.com",
+    "SMTP_SERVER": "smtp.gmail.com",
+    "SMTP_PORT": 587
+  },
+  "HEADERS": {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+    "Connection": "keep-alive"
+  },
+  "rental": {
+    "target_url_base": "https://c.dadi360.com/c/forums/show//87.page",
+    "num_pages_to_scrape": 5,
+    "search_terms": ["2房一厅", "两房一厅", "2卧一厅", "两卧一厅", "2室1厅", "两室一厅", "2房1厅", "两房1厅", "2卧1厅", "两卧1厅"],
+    "send_interval_minutes": 10
+  },
+  "nail_jobs": {
+    "email_subject": "美甲招聘合集",
+    "max_pages": 5,
+    "send_interval_seconds": 172800,
+    "keywords": ["美甲", "指甲", "nail", "甲店", "美甲师", "指甲师", "美甲店", "指甲店", "美甲工作", "指甲工作", "美甲请人", "指甲请人", "美甲招聘", "指甲招聘", "美甲师招聘", "指甲师招聘", "美甲学徒", "指甲学徒", "美甲助理", "指甲助理", "美甲师傅", "指甲师傅", "美甲店请人", "指甲店请人", "美甲店招聘", "指甲店招聘", "小工", "大工"]
+  },
+  "restaurant_jobs": {
+    "email_subject": "餐厅招聘合集",
+    "max_pages": 5,
+    "send_interval_seconds": 172800,
+    "keywords": ["餐厅", "餐馆", "厨师", "企台", "收银", "服务员"]
+  }
+} 
