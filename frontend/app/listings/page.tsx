@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { supabaseOrNull } from "@/lib/supabase";
-import { ListOrdered, Search, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { ListOrdered, Search, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from "lucide-react";
 
 const CATEGORIES = ["rental", "nail_jobs", "restaurant_jobs"] as const;
 const CAT_CONFIG: Record<string, { label: string; color: string }> = {
@@ -18,10 +18,26 @@ const SOURCE_CONFIG: Record<string, { label: string; color: string }> = {
 
 type SortField = "title" | "category" | "author" | "date" | "found_at";
 interface Sort { field: SortField; asc: boolean }
+const PAGE_SIZE = 25;
 
 function SortIcon({ field, sort }: { field: SortField; sort: Sort }) {
   if (sort.field !== field) return <ArrowUpDown size={12} className="opacity-30" />;
   return sort.asc ? <ArrowUp size={12} /> : <ArrowDown size={12} />;
+}
+
+function PageBtn({ n, cur, onClick }: { n: number; cur: number; onClick: (n: number) => void }) {
+  return (
+    <button
+      onClick={() => onClick(n)}
+      className={`w-8 h-8 text-xs font-medium rounded-lg transition-all ${
+        n === cur
+          ? "bg-brand-500/10 text-brand-400 ring-1 ring-brand-500/20"
+          : "text-surface-500 hover:text-surface-300 hover:bg-surface-800/50"
+      }`}
+    >
+      {n + 1}
+    </button>
+  );
 }
 
 export default function ListingsPage() {
@@ -30,20 +46,35 @@ export default function ListingsPage() {
   const [category, setCategory] = useState("");
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<Sort>({ field: "found_at", asc: false });
+  const [page, setPage] = useState(0);
+  const [total, setTotal] = useState(0);
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  // Reset to page 0 when filters change
+  useEffect(() => { setPage(0); }, [category]);
 
   useEffect(() => {
     const db = supabaseOrNull();
     if (!db) return;
     const load = async () => {
       setLoading(true);
+      // Get total count
+      let countQ = db.from("listings").select("*", { count: "exact", head: true });
+      if (category) countQ = countQ.eq("category", category);
+      const { count } = await countQ;
+      setTotal(count ?? 0);
+
+      // Get page data
       let q = db.from("listings").select("*").order("found_at", { ascending: false });
       if (category) q = q.eq("category", category);
-      const { data } = await q.limit(100);
+      const from = page * PAGE_SIZE;
+      const { data } = await q.range(from, from + PAGE_SIZE - 1);
       setListings(data ?? []);
       setLoading(false);
     };
     load();
-  }, [category]);
+  }, [category, page]);
 
   const toggleSort = (field: SortField) => {
     setSort((s) => s.field === field ? { field, asc: !s.asc } : { field, asc: false });
@@ -71,6 +102,17 @@ export default function ListingsPage() {
 
   const thClass = "text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider cursor-pointer select-none hover:text-surface-200 transition-colors";
 
+  // Build page range (show max 7)
+  const pages: number[] = [];
+  if (totalPages <= 7) {
+    for (let i = 0; i < totalPages; i++) pages.push(i);
+  } else {
+    let start = Math.max(0, page - 3);
+    let end = Math.min(totalPages - 1, start + 6);
+    if (end - start < 6) start = Math.max(0, end - 6);
+    for (let i = start; i <= end; i++) pages.push(i);
+  }
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
@@ -82,7 +124,7 @@ export default function ListingsPage() {
             Listings
           </h1>
           <p className="text-sm text-surface-500 mt-1 ml-11">
-            {filtered.length} result{filtered.length !== 1 ? "s" : ""}
+            {total} total — page {page + 1}/{totalPages || 1}
           </p>
         </div>
       </div>
@@ -108,10 +150,10 @@ export default function ListingsPage() {
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-500" />
           <input
             type="text"
-            placeholder="Search title or author..."
+            placeholder="Filter this page…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 pr-3 py-1.5 text-sm rounded-lg border border-surface-800 bg-surface-900 text-surface-300 placeholder-surface-600 focus:outline-none focus:border-brand-600/50 focus:ring-1 focus:ring-brand-500/20 transition-all w-56"
+            className="pl-9 pr-3 py-1.5 text-sm rounded-lg border border-surface-800 bg-surface-900 text-surface-300 placeholder-surface-600 focus:outline-none focus:border-brand-600/50 focus:ring-1 focus:ring-brand-500/20 transition-all w-48"
           />
         </div>
       </div>
@@ -122,81 +164,45 @@ export default function ListingsPage() {
           <thead>
             <tr className="border-b border-surface-800 bg-surface-900/50">
               <th className={thClass} onClick={() => toggleSort("title")}>
-                <span className="flex items-center gap-1.5">
-                  Title <SortIcon field="title" sort={sort} />
-                </span>
+                <span className="flex items-center gap-1.5">Title <SortIcon field="title" sort={sort} /></span>
               </th>
               <th className={thClass + " w-28"} onClick={() => toggleSort("category")}>
-                <span className="flex items-center gap-1.5">
-                  Category <SortIcon field="category" sort={sort} />
-                </span>
+                <span className="flex items-center gap-1.5">Category <SortIcon field="category" sort={sort} /></span>
               </th>
-              <th className={"text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider w-22"}>
-                Source
-              </th>
+              <th className="text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider w-22">Source</th>
               <th className={thClass + " w-24"} onClick={() => toggleSort("author")}>
-                <span className="flex items-center gap-1.5">
-                  Author <SortIcon field="author" sort={sort} />
-                </span>
+                <span className="flex items-center gap-1.5">Author <SortIcon field="author" sort={sort} /></span>
               </th>
               <th className={thClass + " w-28"} onClick={() => toggleSort("date")}>
-                <span className="flex items-center gap-1.5">
-                  Date <SortIcon field="date" sort={sort} />
-                </span>
+                <span className="flex items-center gap-1.5">Date <SortIcon field="date" sort={sort} /></span>
               </th>
-              <th className={"text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider w-16"}>
-                Link
-              </th>
+              <th className="text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider w-16">Link</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-surface-800/50">
-            {loading &&
-              Array.from({ length: 5 }).map((_, i) => (
-                <tr key={i}>
-                  <td colSpan={6} className="px-5 py-4">
-                    <div className="h-4 bg-surface-800 rounded animate-pulse w-3/4" />
-                  </td>
-                </tr>
-              ))}
+            {loading && Array.from({ length: 5 }).map((_, i) => (
+              <tr key={i}><td colSpan={6} className="px-5 py-4"><div className="h-4 bg-surface-800 rounded animate-pulse w-3/4" /></td></tr>
+            ))}
             {!loading && filtered.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-5 py-12 text-center text-surface-500">
-                  No results found.
-                </td>
-              </tr>
+              <tr><td colSpan={6} className="px-5 py-12 text-center text-surface-500">No results found.</td></tr>
             )}
             {filtered.map((l) => (
               <tr key={l.id} className="hover:bg-surface-800/20 transition-colors duration-150">
+                <td className="px-5 py-3.5"><p className="text-surface-200 truncate max-w-md font-medium">{l.title}</p></td>
                 <td className="px-5 py-3.5">
-                  <p className="text-surface-200 truncate max-w-md font-medium">{l.title}</p>
-                </td>
-                <td className="px-5 py-3.5">
-                  <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${
-                      CAT_CONFIG[l.category]?.color || "bg-surface-800 text-surface-400"
-                    }`}
-                  >
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${CAT_CONFIG[l.category]?.color || "bg-surface-800 text-surface-400"}`}>
                     {CAT_CONFIG[l.category]?.label || l.category}
                   </span>
                 </td>
                 <td className="px-5 py-3.5">
-                  <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                      SOURCE_CONFIG[l.source]?.color || "bg-surface-800 text-surface-400"
-                    }`}
-                  >
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${SOURCE_CONFIG[l.source]?.color || "bg-surface-800 text-surface-400"}`}>
                     {SOURCE_CONFIG[l.source]?.label || l.source || "dadi360"}
                   </span>
                 </td>
                 <td className="px-5 py-3.5 text-surface-400">{l.author || "—"}</td>
                 <td className="px-5 py-3.5 text-surface-500 font-mono text-xs">{l.date}</td>
                 <td className="px-5 py-3.5">
-                  <a
-                    href={l.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-brand-400 hover:text-brand-300 transition-colors text-xs font-medium"
-                  >
+                  <a href={l.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-brand-400 hover:text-brand-300 transition-colors text-xs font-medium">
                     Open <ExternalLink size={11} />
                   </a>
                 </td>
@@ -204,6 +210,25 @@ export default function ListingsPage() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-center gap-1.5">
+        <button
+          onClick={() => setPage(Math.max(0, page - 1))}
+          disabled={page === 0}
+          className="w-8 h-8 flex items-center justify-center rounded-lg text-surface-500 hover:text-surface-300 hover:bg-surface-800/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+        >
+          <ChevronLeft size={16} />
+        </button>
+        {pages.map((n) => <PageBtn key={n} n={n} cur={page} onClick={setPage} />)}
+        <button
+          onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+          disabled={page >= totalPages - 1}
+          className="w-8 h-8 flex items-center justify-center rounded-lg text-surface-500 hover:text-surface-300 hover:bg-surface-800/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+        >
+          <ChevronRight size={16} />
+        </button>
       </div>
     </div>
   );
