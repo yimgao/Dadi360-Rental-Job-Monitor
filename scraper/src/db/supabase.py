@@ -25,40 +25,39 @@ class DB:
 
     # ── listings ─────────────────────────────────────────────────────
 
-    def upsert_listing(self, category: str, listing: dict[str, Any]) -> tuple[bool, str | None]:
-        """Insert a listing. Idempotent on (link) — returns (ok, err_msg)."""
+    def upsert_listing(
+        self, category: str, listing: dict[str, Any], source: str = "dadi360"
+    ) -> tuple[bool, str | None]:
+        """Insert a listing. Idempotent on (link)."""
         try:
-            self._client.table("listings").upsert(
-                {
-                    "link": listing["link"],
-                    "title": listing.get("title", ""),
-                    "author": listing.get("author", ""),
-                    "date": listing.get("date", ""),
-                    "description": listing.get("description", ""),
-                    "category": category,
-                    "found_at": datetime.now(timezone.utc).isoformat(),
-                },
-                on_conflict="link",
-            ).execute()
+            row = {
+                "link": listing["link"],
+                "title": listing.get("title", ""),
+                "author": listing.get("author", ""),
+                "date": listing.get("date", ""),
+                "description": listing.get("description", ""),
+                "category": category,
+                "source": source,
+                "found_at": datetime.now(timezone.utc).isoformat(),
+            }
+            self._client.table("listings").upsert(row, on_conflict="link").execute()
             return True, None
         except Exception as exc:
             return False, str(exc)
 
     def bulk_upsert_listings(
-        self, category: str, listings: list[dict[str, Any]]
+        self, category: str, listings: list[dict[str, Any]], source: str = "dadi360"
     ) -> tuple[int, list[str]]:
         """Insert many listings. Returns (success_count, errors)."""
         ok = 0
         errors: list[str] = []
         for lst in listings:
-            success, err = self.upsert_listing(category, lst)
+            success, err = self.upsert_listing(category, lst, source=source)
             if success:
                 ok += 1
             elif err:
                 errors.append(err)
         return ok, errors
-
-    # ── run logging ──────────────────────────────────────────────────
 
     def log_run(
         self,
@@ -67,6 +66,7 @@ class DB:
         duration_s: float,
         success: bool,
         error: str | None = None,
+        source: str = "dadi360",
     ) -> None:
         """Insert a run record."""
         try:
@@ -77,11 +77,12 @@ class DB:
                     "duration_s": duration_s,
                     "success": success,
                     "error": error,
+                    "source": source,
                     "started_at": datetime.now(timezone.utc).isoformat(),
                 }
             ).execute()
-        except Exception as exc:
-            pass  # don't fail the run because logging failed
+        except Exception:
+            pass
 
     # ── config (read-only from scraper side) ─────────────────────────
 

@@ -50,6 +50,7 @@ const badgeColors: Record<string, string> = {
 
 export default function Dashboard() {
   const [counts, setCounts] = useState<Record<string, number>>({});
+  const [sourceCounts, setSourceCounts] = useState<Record<string, number>>({});
   const [recent, setRecent] = useState<any[]>([]);
   const [lastRun, setLastRun] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -69,6 +70,17 @@ export default function Dashboard() {
         c[cat] = count ?? 0;
       }
       setCounts(c);
+
+      // source breakdown per category
+      const src: Record<string, number> = {};
+      for (const s of ["dadi360", "168worker"]) {
+        const { count } = await db
+          .from("listings")
+          .select("*", { count: "exact", head: true })
+          .eq("source", s);
+        src[s] = count ?? 0;
+      }
+      setSourceCounts(src);
 
       const { data: list } = await db
         .from("listings")
@@ -115,6 +127,10 @@ export default function Dashboard() {
         <div className="text-right">
           <p className="text-3xl font-bold text-surface-100">{total}</p>
           <p className="text-xs text-surface-500">total listings tracked</p>
+          <div className="flex gap-2 mt-1.5 justify-end text-[11px]">
+            <span className="text-emerald-400">● dadi360 {sourceCounts.dadi360 ?? "—"}</span>
+            <span className="text-violet-400">● 168worker {sourceCounts["168worker"] ?? "—"}</span>
+          </div>
         </div>
       </div>
 

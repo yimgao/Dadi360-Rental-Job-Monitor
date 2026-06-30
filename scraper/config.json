@@ -26,5 +26,15 @@
     "max_pages": 5,
     "send_interval_minutes": 10,
     "search_terms": ["餐厅", "餐馆", "厨师", "企台", "收银", "服务员"]
+  },
+  "168worker_restaurant_jobs": {
+    "enabled": true,
+    "max_pages": 30,
+    "search_terms": ["餐厅", "餐馆", "厨师", "企台", "收银", "服务员"]
+  },
+  "168worker_nail_jobs": {
+    "enabled": true,
+    "max_pages": 30,
+    "search_terms": ["美甲", "指甲", "nail", "甲店", "美甲师", "指甲师", "美甲店", "指甲店"]
   }
 }

@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 
 from .db import DB
 from .email import EmailSender
-from .scrapers import RentalScraper, NailScraper, RestaurantScraper
+from .scrapers import RentalScraper, NailScraper, RestaurantScraper, Worker168Scraper
 
 load_dotenv()
 
@@ -37,10 +37,14 @@ def get_scraper(category: str, config: dict, db: DB | None, email: EmailSender |
         "rental": RentalScraper,
         "nail_jobs": NailScraper,
         "restaurant_jobs": RestaurantScraper,
+        "168worker_restaurant_jobs": Worker168Scraper,
+        "168worker_nail_jobs": Worker168Scraper,
     }
     cls = cls_map.get(category)
     if cls is None:
         raise ValueError(f"Unknown category: {category}")
+    if category.startswith("168worker_"):
+        return cls(category=category.replace("168worker_", ""), config=config, db=db, email=email)
     return cls(category=category, config=config, db=db, email=email)
 
 
@@ -54,6 +58,7 @@ def run_category(category: str, config: dict, db: DB | None, email: EmailSender 
             duration_s=result["duration_s"],
             success=result["success"],
             error=result.get("error") or result.get("email_error"),
+            source=result.get("source", "dadi360"),
         )
     return result
 
@@ -77,7 +82,7 @@ def main() -> None:
 
     categories = [args.category] if args.category else [k for k, v in config.items() if isinstance(v, dict) and v.get("enabled", True)]
     # filter out non-category keys
-    valid = {"rental", "nail_jobs", "restaurant_jobs"}
+    valid = {"rental", "nail_jobs", "restaurant_jobs", "168worker_restaurant_jobs", "168worker_nail_jobs"}
     categories = [c for c in categories if c in valid]
 
     def run_all() -> None:

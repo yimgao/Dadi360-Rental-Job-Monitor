@@ -11,6 +11,11 @@ const CAT_CONFIG: Record<string, { label: string; color: string }> = {
   restaurant_jobs: { label: "Restaurant", color: "bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20" },
 };
 
+const SOURCE_CONFIG: Record<string, { label: string; color: string }> = {
+  dadi360: { label: "dadi360", color: "bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20" },
+  "168worker": { label: "168worker", color: "bg-violet-500/10 text-violet-400 ring-1 ring-violet-500/20" },
+};
+
 type SortField = "title" | "category" | "author" | "date" | "found_at";
 interface Sort { field: SortField; asc: boolean }
 
@@ -126,6 +131,9 @@ export default function ListingsPage() {
                   Category <SortIcon field="category" sort={sort} />
                 </span>
               </th>
+              <th className={"text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider w-22"}>
+                Source
+              </th>
               <th className={thClass + " w-24"} onClick={() => toggleSort("author")}>
                 <span className="flex items-center gap-1.5">
                   Author <SortIcon field="author" sort={sort} />
@@ -145,14 +153,14 @@ export default function ListingsPage() {
             {loading &&
               Array.from({ length: 5 }).map((_, i) => (
                 <tr key={i}>
-                  <td colSpan={5} className="px-5 py-4">
+                  <td colSpan={6} className="px-5 py-4">
                     <div className="h-4 bg-surface-800 rounded animate-pulse w-3/4" />
                   </td>
                 </tr>
               ))}
             {!loading && filtered.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-5 py-12 text-center text-surface-500">
+                <td colSpan={6} className="px-5 py-12 text-center text-surface-500">
                   No results found.
                 </td>
               </tr>
@@ -169,6 +177,15 @@ export default function ListingsPage() {
                     }`}
                   >
                     {CAT_CONFIG[l.category]?.label || l.category}
+                  </span>
+                </td>
+                <td className="px-5 py-3.5">
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                      SOURCE_CONFIG[l.source]?.color || "bg-surface-800 text-surface-400"
+                    }`}
+                  >
+                    {SOURCE_CONFIG[l.source]?.label || l.source || "dadi360"}
                   </span>
                 </td>
                 <td className="px-5 py-3.5 text-surface-400">{l.author || "—"}</td>
