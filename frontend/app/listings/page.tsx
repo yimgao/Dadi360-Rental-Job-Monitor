@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { supabaseOrNull } from "@/lib/supabase";
-import { List, Search } from "lucide-react";
+import { ListOrdered, Search, ExternalLink } from "lucide-react";
 
 const CATEGORIES = ["rental", "nail_jobs", "restaurant_jobs"] as const;
-const CAT_LABELS: Record<string, string> = {
-  rental: "Rental",
-  nail_jobs: "Nail Jobs",
-  restaurant_jobs: "Restaurant",
+const CAT_CONFIG: Record<string, { label: string; color: string }> = {
+  rental: { label: "Rental", color: "bg-cyan-500/10 text-cyan-400 ring-1 ring-cyan-500/20" },
+  nail_jobs: { label: "Nail Jobs", color: "bg-pink-500/10 text-pink-400 ring-1 ring-pink-500/20" },
+  restaurant_jobs: { label: "Restaurant", color: "bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20" },
 };
 
 export default function ListingsPage() {
@@ -20,7 +20,6 @@ export default function ListingsPage() {
   useEffect(() => {
     const db = supabaseOrNull();
     if (!db) return;
-
     const load = async () => {
       setLoading(true);
       let q = db.from("listings").select("*").order("found_at", { ascending: false });
@@ -33,103 +32,116 @@ export default function ListingsPage() {
   }, [category]);
 
   const filtered = search
-    ? listings.filter(
-        (l) =>
-          l.title?.includes(search) || l.author?.includes(search)
-      )
+    ? listings.filter((l) => l.title?.includes(search) || l.author?.includes(search))
     : listings;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold flex items-center gap-2">
-          <List size={20} className="text-emerald-400" />
-          Listings
-        </h1>
-        <p className="text-sm text-zinc-500">{filtered.length} results</p>
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
+              <ListOrdered size={16} className="text-white" />
+            </div>
+            Listings
+          </h1>
+          <p className="text-sm text-surface-500 mt-1 ml-11">
+            {filtered.length} result{filtered.length !== 1 ? "s" : ""}
+          </p>
+        </div>
       </div>
 
-      {/* filters */}
-      <div className="flex gap-3 flex-wrap">
-        <button
-          onClick={() => setCategory("")}
-          className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
-            !category
-              ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
-              : "border-zinc-800 text-zinc-400 hover:border-zinc-600"
-          }`}
-        >
-          All
-        </button>
-        {CATEGORIES.map((c) => (
-          <button
-            key={c}
-            onClick={() => setCategory(c)}
-            className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
-              category === c
-                ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
-                : "border-zinc-800 text-zinc-400 hover:border-zinc-600"
-            }`}
-          >
-            {CAT_LABELS[c]}
-          </button>
-        ))}
-
+      {/* Filters */}
+      <div className="flex gap-2 flex-wrap items-center">
+        {[{ key: "", label: "All" }, ...CATEGORIES.map((c) => ({ key: c, label: CAT_CONFIG[c].label }))].map(
+          (f) => (
+            <button
+              key={f.key}
+              onClick={() => setCategory(f.key)}
+              className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-150 ${
+                category === f.key
+                  ? "bg-brand-500/10 text-brand-400 ring-1 ring-brand-500/20"
+                  : "text-surface-400 hover:text-surface-200 hover:bg-surface-800/50 ring-1 ring-surface-800"
+              }`}
+            >
+              {f.label}
+            </button>
+          )
+        )}
         <div className="relative ml-auto">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-500" />
           <input
             type="text"
-            placeholder="Filter title / author…"
+            placeholder="Search title or author..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-8 pr-3 py-1.5 text-sm rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-300 focus:outline-none focus:border-zinc-600 w-56"
+            className="pl-9 pr-3 py-1.5 text-sm rounded-lg border border-surface-800 bg-surface-900 text-surface-300 placeholder-surface-600 focus:outline-none focus:border-brand-600/50 focus:ring-1 focus:ring-brand-500/20 transition-all w-56"
           />
         </div>
       </div>
 
-      {/* table */}
-      <div className="rounded-xl border border-zinc-800 overflow-hidden">
+      {/* Table */}
+      <div className="rounded-2xl border border-surface-800 overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-800 bg-zinc-900/50">
-              <th className="text-left px-4 py-2.5 font-medium text-zinc-400">Title</th>
-              <th className="text-left px-4 py-2.5 font-medium text-zinc-400 w-28">Category</th>
-              <th className="text-left px-4 py-2.5 font-medium text-zinc-400 w-28">Author</th>
-              <th className="text-left px-4 py-2.5 font-medium text-zinc-400 w-24">Date</th>
-              <th className="text-left px-4 py-2.5 font-medium text-zinc-400 w-8"></th>
+            <tr className="border-b border-surface-800 bg-surface-900/50">
+              <th className="text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider">
+                Title
+              </th>
+              <th className="text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider w-28">
+                Category
+              </th>
+              <th className="text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider w-24">
+                Author
+              </th>
+              <th className="text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider w-28">
+                Date
+              </th>
+              <th className="text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider w-16">
+                Link
+              </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-800">
-            {loading && (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-zinc-600">
-                  Loading…
-                </td>
-              </tr>
-            )}
+          <tbody className="divide-y divide-surface-800/50">
+            {loading &&
+              Array.from({ length: 5 }).map((_, i) => (
+                <tr key={i}>
+                  <td colSpan={5} className="px-5 py-4">
+                    <div className="h-4 bg-surface-800 rounded animate-pulse w-3/4" />
+                  </td>
+                </tr>
+              ))}
             {!loading && filtered.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-zinc-600">
-                  No results.
+                <td colSpan={5} className="px-5 py-12 text-center text-surface-500">
+                  No results found.
                 </td>
               </tr>
             )}
             {filtered.map((l) => (
-              <tr key={l.id} className="hover:bg-zinc-800/30 transition-colors">
-                <td className="px-4 py-3">
-                  <p className="truncate max-w-md">{l.title}</p>
+              <tr key={l.id} className="hover:bg-surface-800/20 transition-colors duration-150">
+                <td className="px-5 py-3.5">
+                  <p className="text-surface-200 truncate max-w-md font-medium">{l.title}</p>
                 </td>
-                <td className="px-4 py-3 text-zinc-400">{CAT_LABELS[l.category] ?? l.category}</td>
-                <td className="px-4 py-3 text-zinc-400">{l.author || "—"}</td>
-                <td className="px-4 py-3 text-zinc-500 font-mono text-xs">{l.date}</td>
-                <td className="px-4 py-3">
+                <td className="px-5 py-3.5">
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${
+                      CAT_CONFIG[l.category]?.color || "bg-surface-800 text-surface-400"
+                    }`}
+                  >
+                    {CAT_CONFIG[l.category]?.label || l.category}
+                  </span>
+                </td>
+                <td className="px-5 py-3.5 text-surface-400">{l.author || "—"}</td>
+                <td className="px-5 py-3.5 text-surface-500 font-mono text-xs">{l.date}</td>
+                <td className="px-5 py-3.5">
                   <a
                     href={l.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-emerald-400 hover:text-emerald-300 text-xs"
+                    className="inline-flex items-center gap-1 text-brand-400 hover:text-brand-300 transition-colors text-xs font-medium"
                   >
-                    Open
+                    Open <ExternalLink size={11} />
                   </a>
                 </td>
               </tr>

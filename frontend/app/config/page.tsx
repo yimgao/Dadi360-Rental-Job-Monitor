@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabaseOrNull } from "@/lib/supabase";
-import { Settings, Save } from "lucide-react";
+import { Settings, Save, CheckCircle2 } from "lucide-react";
 
 interface ConfigRow {
   id: number;
@@ -11,11 +11,11 @@ interface ConfigRow {
 }
 
 const FIELDS = [
-  { key: "rental_keywords", label: "Rental Keywords", hint: "comma separated" },
-  { key: "nail_keywords", label: "Nail Job Keywords", hint: "comma separated" },
-  { key: "restaurant_keywords", label: "Restaurant Keywords", hint: "comma separated" },
-  { key: "receiver_email", label: "Notification Email", hint: "email address" },
-  { key: "scrape_interval_min", label: "Scrape Interval (min)", hint: "number" },
+  { key: "rental_keywords", label: "Rental Keywords", hint: "Comma-separated Chinese terms" },
+  { key: "nail_keywords", label: "Nail Job Keywords", hint: "Comma-separated Chinese terms" },
+  { key: "restaurant_keywords", label: "Restaurant Keywords", hint: "Comma-separated Chinese terms" },
+  { key: "receiver_email", label: "Notification Email", hint: "Gmail address for alerts" },
+  { key: "scrape_interval_min", label: "Scrape Interval (min)", hint: "How often the cron job runs" },
 ];
 
 export default function ConfigPage() {
@@ -50,7 +50,6 @@ export default function ConfigPage() {
   const save = async () => {
     const db = supabaseOrNull();
     if (!db) return;
-
     setSaving(true);
     setMsg("");
     for (const row of rows) {
@@ -62,58 +61,67 @@ export default function ConfigPage() {
     }
     setDirty(false);
     setSaving(false);
-    setMsg("Saved ✓");
-    setTimeout(() => setMsg(""), 2500);
+    setMsg("Saved");
+    setTimeout(() => setMsg(""), 3000);
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold flex items-center gap-2">
-          <Settings size={20} className="text-emerald-400" />
-          Config
-        </h1>
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
+              <Settings size={16} className="text-white" />
+            </div>
+            Config
+          </h1>
+          <p className="text-sm text-surface-500 mt-1 ml-11">Scraper settings and keywords</p>
+        </div>
         <button
           onClick={save}
           disabled={!dirty || saving}
-          className={`flex items-center gap-1.5 px-4 py-1.5 text-sm rounded-lg transition-colors ${
+          className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-xl transition-all duration-150 ${
             dirty
-              ? "bg-emerald-600 hover:bg-emerald-500 text-white"
-              : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+              ? "bg-brand-500 hover:bg-brand-400 text-white shadow-lg shadow-brand-500/20"
+              : "bg-surface-800 text-surface-500 cursor-not-allowed"
           }`}
         >
           <Save size={14} />
-          {saving ? "Saving…" : "Save"}
+          {saving ? "Saving..." : "Save"}
         </button>
       </div>
 
       {msg && (
-        <div className="px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm">
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-400 text-sm">
+          <CheckCircle2 size={14} />
           {msg}
         </div>
       )}
 
-      <div className="space-y-4">
+      <div className="grid gap-4">
         {FIELDS.map((f) => (
-          <div key={f.key} className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
-            <label className="block text-sm font-medium text-zinc-300 mb-1.5">{f.label}</label>
+          <div
+            key={f.key}
+            className="rounded-2xl border border-surface-800 bg-surface-900/50 p-5 hover:border-surface-700 transition-colors"
+          >
+            <label className="block text-sm font-semibold text-surface-300 mb-1.5">{f.label}</label>
             <input
               type="text"
               value={getVal(f.key)}
               onChange={(e) => setVal(f.key, e.target.value)}
               placeholder={f.hint}
-              className="w-full px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-950 text-zinc-200 text-sm placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500"
+              className="w-full px-3.5 py-2 rounded-xl border border-surface-700 bg-surface-950 text-surface-200 text-sm placeholder:text-surface-600 focus:outline-none focus:border-brand-600/50 focus:ring-1 focus:ring-brand-500/20 transition-all"
             />
-            <p className="text-xs text-zinc-600 mt-1">{f.hint}</p>
+            <p className="text-xs text-surface-600 mt-1.5">{f.hint}</p>
           </div>
         ))}
       </div>
 
-      <details className="rounded-xl border border-zinc-800">
-        <summary className="px-4 py-3 text-sm text-zinc-400 cursor-pointer hover:text-zinc-200 font-medium">
+      <details className="rounded-2xl border border-surface-800 group">
+        <summary className="px-5 py-3 text-sm text-surface-500 cursor-pointer hover:text-surface-300 font-medium transition-colors">
           Raw config table
         </summary>
-        <pre className="px-4 pb-4 text-xs text-zinc-500 overflow-auto max-h-64">
+        <pre className="px-5 pb-4 text-xs text-surface-500 overflow-auto max-h-64">
           {JSON.stringify(rows, null, 2)}
         </pre>
       </details>

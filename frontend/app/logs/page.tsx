@@ -6,6 +6,7 @@ import { ScrollText, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export default function LogsPage() {
   const [runs, setRuns] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const db = supabaseOrNull();
@@ -15,41 +16,73 @@ export default function LogsPage() {
       .select("*")
       .order("started_at", { ascending: false })
       .limit(50)
-      .then(({ data }) => setRuns(data ?? []));
+      .then(({ data }) => {
+        setRuns(data ?? []);
+        setLoading(false);
+      });
   }, []);
 
+  const successCount = runs.filter((r) => r.success).length;
+  const errorCount = runs.filter((r) => !r.success).length;
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold flex items-center gap-2">
-          <ScrollText size={20} className="text-emerald-400" />
-          Logs
-        </h1>
-        <p className="text-sm text-zinc-500 mt-1">Run history and errors</p>
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
+              <ScrollText size={16} className="text-white" />
+            </div>
+            Logs
+          </h1>
+          <p className="text-sm text-surface-500 mt-1 ml-11">Run history and errors</p>
+        </div>
+        <div className="flex gap-3 text-sm">
+          <span className="flex items-center gap-1.5 text-brand-400">
+            <CheckCircle2 size={14} />
+            {successCount} success
+          </span>
+          {errorCount > 0 && (
+            <span className="flex items-center gap-1.5 text-red-400">
+              <AlertCircle size={14} />
+              {errorCount} failed
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className="rounded-xl border border-zinc-800 divide-y divide-zinc-800">
-        {runs.length === 0 && (
-          <p className="text-sm text-zinc-600 p-6 text-center">No run logs yet.</p>
+      <div className="rounded-2xl border border-surface-800 divide-y divide-surface-800/50 overflow-hidden">
+        {loading &&
+          Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="px-5 py-4 flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-surface-700 animate-pulse" />
+              <div className="h-3 bg-surface-800 rounded animate-pulse w-20" />
+              <div className="h-3 bg-surface-800 rounded animate-pulse w-32" />
+            </div>
+          ))}
+        {!loading && runs.length === 0 && (
+          <p className="text-sm text-surface-500 p-10 text-center">
+            No run logs yet.
+          </p>
         )}
         {runs.map((r) => (
-          <div key={r.id} className="px-4 py-3 flex items-start gap-3">
+          <div key={r.id} className="px-5 py-3.5 flex items-start gap-3 hover:bg-surface-800/20 transition-colors">
             {r.success ? (
-              <CheckCircle2 size={16} className="text-emerald-500 mt-0.5 shrink-0" />
+              <CheckCircle2 size={16} className="text-brand-500 mt-0.5 shrink-0" />
             ) : (
               <AlertCircle size={16} className="text-red-500 mt-0.5 shrink-0" />
             )}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 text-sm">
-                <span className="font-mono text-zinc-200">{r.category}</span>
-                <span className="text-zinc-500">
-                  {r.new_count} new · {r.duration_s}s
+                <span className="font-mono text-xs text-surface-200 font-medium">{r.category}</span>
+                <span className="text-surface-500 text-xs">
+                  {r.new_count} new listings · {r.duration_s}s
                 </span>
                 {r.error && (
-                  <span className="text-red-400 text-xs truncate">{r.error}</span>
+                  <span className="text-red-400 text-xs truncate max-w-xs">{r.error}</span>
                 )}
               </div>
-              <p className="text-xs text-zinc-600 mt-0.5">
+              <p className="text-xs text-surface-600 mt-0.5">
                 {new Date(r.started_at).toLocaleString("zh-CN")}
               </p>
             </div>
