@@ -1,0 +1,14 @@
+[project]
+name = "dadi360-scraper"
+version = "0.1.0"
+description = "c.dadi360.com forum scraper for rental/job listings"
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.31",
+    "beautifulsoup4>=4.12",
+    "supabase>=2.0",
+    "python-dotenv>=1.0",
+]
+
+[tool.uv]
+dev-dependencies = []
