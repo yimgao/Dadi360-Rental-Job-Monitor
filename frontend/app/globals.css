@@ -32,13 +32,11 @@ body {
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--color-surface-700); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-surface-600); }
 
-/* Card glow on hover */
 .glow-card {
   position: relative;
   transition: all 0.2s ease;
