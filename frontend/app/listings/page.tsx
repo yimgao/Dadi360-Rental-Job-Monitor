@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabaseOrNull } from "@/lib/supabase";
-import { ListOrdered, Search, ExternalLink } from "lucide-react";
+import { ListOrdered, Search, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
 const CATEGORIES = ["rental", "nail_jobs", "restaurant_jobs"] as const;
 const CAT_CONFIG: Record<string, { label: string; color: string }> = {
@@ -11,11 +11,20 @@ const CAT_CONFIG: Record<string, { label: string; color: string }> = {
   restaurant_jobs: { label: "Restaurant", color: "bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20" },
 };
 
+type SortField = "title" | "category" | "author" | "date" | "found_at";
+interface Sort { field: SortField; asc: boolean }
+
+function SortIcon({ field, sort }: { field: SortField; sort: Sort }) {
+  if (sort.field !== field) return <ArrowUpDown size={12} className="opacity-30" />;
+  return sort.asc ? <ArrowUp size={12} /> : <ArrowDown size={12} />;
+}
+
 export default function ListingsPage() {
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState("");
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<Sort>({ field: "found_at", asc: false });
 
   useEffect(() => {
     const db = supabaseOrNull();
@@ -31,9 +40,31 @@ export default function ListingsPage() {
     load();
   }, [category]);
 
-  const filtered = search
-    ? listings.filter((l) => l.title?.includes(search) || l.author?.includes(search))
-    : listings;
+  const toggleSort = (field: SortField) => {
+    setSort((s) => s.field === field ? { field, asc: !s.asc } : { field, asc: false });
+  };
+
+  const filtered = useMemo(() => {
+    let items = listings;
+    if (search) {
+      const q = search.toLowerCase();
+      items = items.filter((l) => l.title?.toLowerCase().includes(q) || l.author?.toLowerCase().includes(q));
+    }
+    return [...items].sort((a, b) => {
+      let va = a[sort.field] ?? "";
+      let vb = b[sort.field] ?? "";
+      if (sort.field === "found_at") {
+        return sort.asc
+          ? new Date(va).getTime() - new Date(vb).getTime()
+          : new Date(vb).getTime() - new Date(va).getTime();
+      }
+      va = String(va).toLowerCase();
+      vb = String(vb).toLowerCase();
+      return sort.asc ? va.localeCompare(vb) : vb.localeCompare(va);
+    });
+  }, [listings, search, sort]);
+
+  const thClass = "text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider cursor-pointer select-none hover:text-surface-200 transition-colors";
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -85,19 +116,27 @@ export default function ListingsPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-surface-800 bg-surface-900/50">
-              <th className="text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider">
-                Title
+              <th className={thClass} onClick={() => toggleSort("title")}>
+                <span className="flex items-center gap-1.5">
+                  Title <SortIcon field="title" sort={sort} />
+                </span>
               </th>
-              <th className="text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider w-28">
-                Category
+              <th className={thClass + " w-28"} onClick={() => toggleSort("category")}>
+                <span className="flex items-center gap-1.5">
+                  Category <SortIcon field="category" sort={sort} />
+                </span>
               </th>
-              <th className="text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider w-24">
-                Author
+              <th className={thClass + " w-24"} onClick={() => toggleSort("author")}>
+                <span className="flex items-center gap-1.5">
+                  Author <SortIcon field="author" sort={sort} />
+                </span>
               </th>
-              <th className="text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider w-28">
-                Date
+              <th className={thClass + " w-28"} onClick={() => toggleSort("date")}>
+                <span className="flex items-center gap-1.5">
+                  Date <SortIcon field="date" sort={sort} />
+                </span>
               </th>
-              <th className="text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider w-16">
+              <th className={"text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider w-16"}>
                 Link
               </th>
             </tr>
