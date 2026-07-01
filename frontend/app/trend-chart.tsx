@@ -34,8 +34,9 @@ export function TrendChart() {
 
       const { data: rows } = await db
         .from("listings")
-        .select("found_at, category")
-        .gte("found_at", cutoff.toISOString());
+        .select("date, category")
+        .not("date", "is", "null")
+        .neq("date", "");
 
       if (!rows) { setLoading(false); return; }
 
@@ -44,12 +45,39 @@ export function TrendChart() {
       const cats = ["rental", "nail_jobs", "restaurant_jobs"];
 
       for (const row of rows) {
-        const d = new Date(row.found_at).toISOString().slice(0, 10);
-        if (!dateMap[d]) {
-          dateMap[d] = { date: d, rental: 0, nail_jobs: 0, restaurant_jobs: 0 };
+        // Parse various date formats into YYYY-MM-DD
+        let d = (row.date || "").trim();
+        if (!d) continue;
+        // "2026-6-29" → pad to "2026-06-29"
+        // "6/29/2026" → "2026-06-29"
+        // "昨天" / "今天" → skip (can't determine exact date)
+        // full ISO → extract date part
+        let dateKey = "";
+        if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(d)) {
+          const parts = d.split("-");
+          dateKey = `${parts[0]}-${parts[1].padStart(2,"0")}-${parts[2].padStart(2,"0")}`;
+        } else if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(d)) {
+          const parts = d.split("/");
+          dateKey = `${parts[2]}-${parts[0].padStart(2,"0")}-${parts[1].padStart(2,"0")}`;
+        } else if (/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(d)) {
+          const parts = d.split("/");
+          dateKey = `${parts[0]}-${parts[1].padStart(2,"0")}-${parts[2].padStart(2,"0")}`;
+        } else {
+          continue; // skip unparseable
+        }
+
+        // Only include last 60 days
+        const dt = new Date(dateKey);
+        if (isNaN(dt.getTime())) continue;
+        const now = new Date();
+        const diffDays = (now.getTime() - dt.getTime()) / 86400000;
+        if (diffDays < 0 || diffDays > 60) continue;
+
+        if (!dateMap[dateKey]) {
+          dateMap[dateKey] = { date: dateKey, rental: 0, nail_jobs: 0, restaurant_jobs: 0 };
         }
         if (cats.includes(row.category)) {
-          dateMap[d][row.category] += 1;
+          dateMap[dateKey][row.category] += 1;
         }
       }
 
