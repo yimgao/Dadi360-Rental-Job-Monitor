@@ -4,8 +4,9 @@ Site: Nuxt 3 SPA with server-side rendering for job pages.
 - Job listing page:  https://www.us168168.com/job/?page=N
 - Each page has 20 items rendered server-side in
   <div class="universal-list-module-item" data-id="...">
-- Filter by title keywords for restaurant vs nail.
+- Filter by title/keywords for restaurant vs nail.
 - Cloudflare-protected; use cloudscraper to bypass.
+- Incremental: pre-loads existing links to skip DB writes for dupes.
 """
 
 from __future__ import annotations
@@ -23,31 +24,29 @@ from ..email import EmailSender
 DOMAIN = "https://www.us168168.com"
 REQ_DELAY = 1.5
 MAX_PAGES = 20
-DAYS_BACK = 4
+
+# Expanded keyword lists for better classification
+CATEGORY_KEYWORDS: dict[str, list[str]] = {
+    "restaurant_jobs": [
+        "餐馆", "餐厅", "厨师", "炒锅", "炒鑊", "厨房", "企台",
+        "服务员", "收银", "帮炒", "油锅", "打杂", "洗碗",
+        "寿司", "日餐", "奶茶", "甜品", "面包", "烘焙",
+        "送外卖", "外卖", "熟手炒", "厨房工", "快餐",
+        "饺子", "面点", "烧烤", "火锅", "后厨", "前厅",
+    ],
+    "nail_jobs": [
+        "美甲", "指甲", "nail", "甲店", "美甲师", "指甲师",
+        "美甲店", "指甲店", "小工", "大工", "中工",
+        "按摩", "美甲学徒", "美甲助理", "美甲师傅",
+        "指甲工", "甲工",
+    ],
+}
 
 
 class Us168Scraper:
-    """Scrape us168168.com job listings for a given category.
-
-    Categories: 'restaurant_jobs', 'nail_jobs'
-    Filtering is done by keyword matching on the title.
-    """
+    """Scrape us168168.com job listings for a given category."""
 
     SOURCE = "us168168"
-
-    CATEGORY_KEYWORDS = {
-        "restaurant_jobs": [
-            "餐馆", "餐厅", "厨师", "炒锅", "炒鑊", "厨房", "企台",
-            "服务员", "收银", "帮炒", "油锅", "打杂", "洗碗",
-            "寿司", "日餐", "奶茶", "甜品", "面包", "烘焙",
-            "送外卖", "外卖",
-        ],
-        "nail_jobs": [
-            "美甲", "指甲", "nail", "甲店", "美甲师", "指甲师",
-            "美甲店", "指甲店", "美甲小工", "美甲大工", "美甲中工",
-            "美甲学徒", "小工", "大工", "按摩",
-        ],
-    }
 
     def __init__(
         self,
@@ -56,18 +55,15 @@ class Us168Scraper:
         db: DB | None = None,
         email: EmailSender | None = None,
     ) -> None:
-        # Strip source prefix if present (e.g. "us168_nail_jobs" → "nail_jobs")
         clean_cat = category.replace("us168_", "").replace("168worker_", "")
         self.category = clean_cat
         self.cfg = config.get(category, {})
         self.db = db
         self.email = email
-        self.keywords = self.CATEGORY_KEYWORDS.get(clean_cat, [])
+        self.keywords = CATEGORY_KEYWORDS.get(clean_cat, [])
 
         import cloudscraper
         self._session = cloudscraper.create_scraper()
-
-    # ── helpers ──────────────────────────────────────────────────────
 
     def fetch_page(self, page_num: int) -> str | None:
         url = f"{DOMAIN}/job/?page={page_num}"
@@ -79,7 +75,6 @@ class Us168Scraper:
             return None
 
     def parse_page(self, html: str) -> list[dict[str, str]]:
-        """Parse SSR HTML → list of matching listing dicts."""
         soup = BeautifulSoup(html, "html.parser")
         results: list[dict[str, str]] = []
 
@@ -87,36 +82,39 @@ class Us168Scraper:
             data_id = item.get("data-id", "")
             full_text = item.get_text(separator=" ", strip=True)
 
-            # Check if any keyword matches the title
-            # The title is the first meaningful text block
+            # Check full text (includes title + classify tags + description)
             if not any(kw in full_text for kw in self.keywords):
                 continue
 
-            # Extract title (first meaningful text)
-            title_el = item.find(["p", "span", "div"], class_=lambda c: c and "single-line" in str(c) and "flex-1" not in str(c))
+            # Title
+            title_el = item.find(
+                ["p", "span", "div"],
+                class_=lambda c: c and "single-line" in str(c) and "flex-1" not in str(c),
+            )
             title = title_el.get_text(strip=True) if title_el else ""
 
             # Location
-            loc_el = item.find("span", class_=lambda c: c and "flex-1" in str(c) and "single-line" in str(c))
+            loc_el = item.find(
+                "span", class_=lambda c: c and "flex-1" in str(c) and "single-line" in str(c)
+            )
             location = loc_el.get_text(strip=True) if loc_el else ""
 
-            # Price/Salary
+            # Price / Salary
             price_el = item.find("span", class_=lambda c: c and "text-[20px]" in str(c))
             price = price_el.get_text(strip=True) if price_el else ""
 
-            # Classify tags (job type)
+            # Classify tags
             tags = []
             for tag_el in item.find_all("div", class_="classify-item"):
                 tags.append(tag_el.get_text(strip=True))
 
-            # Link to detail page
             link = f"https://www.us168168.com/job/details/{data_id}" if data_id else ""
 
             results.append({
                 "title": title or full_text[:60],
                 "link": link,
                 "author": location,
-                "date": "",  # date is in Nuxt data, not SSR; will use publishTime from API
+                "date": "",
                 "salary": price,
                 "tags": ",".join(tags),
                 "data_id": data_id,
@@ -124,10 +122,12 @@ class Us168Scraper:
 
         return results
 
-    # ── public ───────────────────────────────────────────────────────
+    def scrape(self, existing_links: set[str] | None = None) -> list[dict[str, str]]:
+        """Scrape pages, filtering out already-known links.
 
-    def scrape(self) -> list[dict[str, str]]:
-        """Scrape pages until we exhaust recent listings."""
+        Args:
+            existing_links: Set of links already in DB (for incremental).
+        """
         all_listings: list[dict[str, str]] = []
 
         for page_num in range(1, MAX_PAGES + 1):
@@ -136,11 +136,11 @@ class Us168Scraper:
                 break
 
             listings = self.parse_page(html)
-            if not listings:
-                # Still continue - maybe no matches on this page
-                pass
 
             for lst in listings:
+                # Skip if already in DB (incremental)
+                if existing_links and lst["link"] in existing_links:
+                    continue
                 lst["source"] = self.SOURCE
                 all_listings.append(lst)
 
@@ -149,8 +149,13 @@ class Us168Scraper:
         return all_listings
 
     def run(self) -> dict[str, Any]:
+        # Pre-load existing links for incremental mode
+        existing: set[str] | None = None
+        if self.db:
+            existing = self.db.load_sent_ids()
+
         start = time.time()
-        listings = self.scrape()
+        listings = self.scrape(existing_links=existing)
         new_count = len(listings)
         elapsed = round(time.time() - start, 2)
 
@@ -191,8 +196,7 @@ class Us168Scraper:
                 f"{i}. {lst['title']}"
                 f"\n    地区: {lst.get('author', '?')}"
                 f"\n    薪资: {lst.get('salary', '?')}"
-                f"\n    链接: {lst['link']}"
-                f"\n"
+                f"\n    链接: {lst['link']}\n"
             )
         lines.append(f"\n抓取时间: {datetime.now():%Y-%m-%d %H:%M:%S}")
         return "\n".join(lines)
