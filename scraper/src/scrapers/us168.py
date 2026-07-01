@@ -82,28 +82,23 @@ class Us168Scraper:
             data_id = item.get("data-id", "")
             full_text = item.get_text(separator=" ", strip=True)
 
-            # Check full text (includes title + classify tags + description)
             if not any(kw in full_text for kw in self.keywords):
                 continue
 
-            # Title
             title_el = item.find(
                 ["p", "span", "div"],
                 class_=lambda c: c and "single-line" in str(c) and "flex-1" not in str(c),
             )
             title = title_el.get_text(strip=True) if title_el else ""
 
-            # Location
             loc_el = item.find(
                 "span", class_=lambda c: c and "flex-1" in str(c) and "single-line" in str(c)
             )
             location = loc_el.get_text(strip=True) if loc_el else ""
 
-            # Price / Salary
             price_el = item.find("span", class_=lambda c: c and "text-[20px]" in str(c))
             price = price_el.get_text(strip=True) if price_el else ""
 
-            # Classify tags
             tags = []
             for tag_el in item.find_all("div", class_="classify-item"):
                 tags.append(tag_el.get_text(strip=True))
@@ -122,12 +117,27 @@ class Us168Scraper:
 
         return results
 
-    def scrape(self, existing_links: set[str] | None = None) -> list[dict[str, str]]:
-        """Scrape pages, filtering out already-known links.
+    def _extract_nuxt_dates(self, html: str) -> list[str]:
+        """Extract publish dates from Nuxt SSR __NUXT__ JSON."""
+        import json
+        m = re.search(
+            r'<script[^>]*type="application/json"[^>]*>(.*?)</script>',
+            html, re.DOTALL,
+        )
+        if not m:
+            return []
+        data = json.loads(m.group(1))
+        dates: list[str] = []
+        for val in data:
+            if isinstance(val, dict) and "publishTime" in val:
+                ts = val["publishTime"]
+                if isinstance(ts, (int, float)) and ts > 1000000000000:
+                    dt = datetime.fromtimestamp(ts / 1000).strftime("%m/%d/%Y")
+                    dates.append(dt)
+        return dates
 
-        Args:
-            existing_links: Set of links already in DB (for incremental).
-        """
+    def scrape(self, existing_links: set[str] | None = None) -> list[dict[str, str]]:
+        """Scrape pages, filtering out already-known links and extracting dates."""
         all_listings: list[dict[str, str]] = []
 
         for page_num in range(1, MAX_PAGES + 1):
@@ -135,10 +145,16 @@ class Us168Scraper:
             if not html:
                 break
 
+            # Extract dates from Nuxt SSR data (if available)
+            nuxt_dates = self._extract_nuxt_dates(html)
+
             listings = self.parse_page(html)
 
-            for lst in listings:
-                # Skip if already in DB (incremental)
+            # Assign dates by position (from Nuxt SSR) or fallback
+            now_str = datetime.now().strftime("%m/%d/%Y")
+            for i, lst in enumerate(listings):
+                lst["date"] = nuxt_dates[i] if i < len(nuxt_dates) else now_str
+
                 if existing_links and lst["link"] in existing_links:
                     continue
                 lst["source"] = self.SOURCE
