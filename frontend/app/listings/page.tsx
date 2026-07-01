@@ -2,10 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { supabaseOrNull } from "@/lib/supabase";
-import {
-  ListOrdered, Search, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown,
-  ChevronLeft, ChevronRight, Download, Filter, X,
-} from "lucide-react";
+import { ListOrdered, Search, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown,
+  ChevronLeft, ChevronRight, Download, Filter, X, DollarSign } from "lucide-react";
+import { extractPrice } from "@/lib/price";
 
 const CATEGORIES = ["rental", "nail_jobs", "restaurant_jobs"] as const;
 const CAT_LABELS: Record<string, string> = {
@@ -221,16 +220,17 @@ export default function ListingsPage() {
               <th className={thClass + " w-28"} onClick={() => toggleSort("category")}><span className="flex items-center gap-1.5">分类 <SortIcon field="category" sort={sort} /></span></th>
               <th className="text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider w-22">来源</th>
               <th className={thClass + " w-24"} onClick={() => toggleSort("author")}><span className="flex items-center gap-1.5">作者/地区 <SortIcon field="author" sort={sort} /></span></th>
+              <th className="text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider w-16"><DollarSign size={12} className="inline" /> 价格</th>
               <th className={thClass + " w-28"} onClick={() => toggleSort("date")}><span className="flex items-center gap-1.5">日期 <SortIcon field="date" sort={sort} /></span></th>
               <th className="text-left px-5 py-3 font-semibold text-surface-400 text-xs uppercase tracking-wider w-16">链接</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-surface-800/50">
             {loading && Array.from({ length: 3 }).map((_, i) => (
-              <tr key={i}><td colSpan={6} className="px-5 py-4"><div className="h-4 bg-surface-800 rounded animate-pulse w-3/4" /></td></tr>
+              <tr key={i}><td colSpan={7} className="px-5 py-4"><div className="h-4 bg-surface-800 rounded animate-pulse w-3/4" /></td></tr>
             ))}
             {!loading && filtered.length === 0 && (
-              <tr><td colSpan={6} className="px-5 py-12 text-center text-surface-500">暂无数据。</td></tr>
+              <tr><td colSpan={7} className="px-5 py-12 text-center text-surface-500">暂无数据。</td></tr>
             )}
             {filtered.map((l) => (
               <tr key={l.id} className="hover:bg-surface-800/20 transition-colors duration-150">
@@ -242,6 +242,12 @@ export default function ListingsPage() {
                   <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${SOURCE_CONFIG[l.source]?.color || "bg-surface-800 text-surface-400"}`}>{SOURCE_CONFIG[l.source]?.label || l.source || "dadi360"}</span>
                 </td>
                 <td className="px-5 py-3.5 text-surface-400">{l.author || "—"}</td>
+                <td className="px-5 py-3.5">
+                  {(() => {
+                    const p = extractPrice(l.title, l.salary);
+                    return p.label ? <span className="text-xs font-mono text-brand-400">{p.label}</span> : <span className="text-xs text-surface-600">—</span>;
+                  })()}
+                </td>
                 <td className="px-5 py-3.5 text-surface-500 font-mono text-xs">{l.date}</td>
                 <td className="px-5 py-3.5">
                   <a href={l.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-brand-400 hover:text-brand-300 transition-colors text-xs font-medium">打开 <ExternalLink size={11} /></a>
@@ -268,6 +274,7 @@ export default function ListingsPage() {
               <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${CAT_COLORS[l.category] || "bg-surface-800 text-surface-400"}`}>{CAT_LABELS[l.category] || l.category}</span>
               <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${SOURCE_CONFIG[l.source]?.color || "bg-surface-800 text-surface-400"}`}>{SOURCE_CONFIG[l.source]?.label || l.source || "dadi360"}</span>
               {l.author && <span className="text-surface-500">{l.author}</span>}
+              {(() => { const p = extractPrice(l.title); return p.label ? <span className="text-brand-400 font-mono">{p.label}</span> : null; })()}
               <span className="text-surface-600">{l.date}</span>
             </div>
           </a>
