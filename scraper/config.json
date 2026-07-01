@@ -46,5 +46,20 @@
     "enabled": true,
     "max_pages": 30,
     "search_terms": ["美甲", "指甲", "nail", "甲店", "美甲师", "按摩"]
+  },
+  "moonbbs_rental": {
+    "enabled": true,
+    "max_pages": 10,
+    "search_terms": ["租房", "出租", "求租", "公寓"]
+  },
+  "moonbbs_restaurant_jobs": {
+    "enabled": true,
+    "max_pages": 10,
+    "search_terms": ["餐厅", "餐馆", "厨师", "企台", "收银"]
+  },
+  "moonbbs_nail_jobs": {
+    "enabled": true,
+    "max_pages": 10,
+    "search_terms": ["美甲", "指甲", "nail", "甲店"]
   }
 }

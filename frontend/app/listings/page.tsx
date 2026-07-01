@@ -21,6 +21,7 @@ const SOURCE_CONFIG: Record<string, { label: string; color: string }> = {
   dadi360: { label: "dadi360", color: "bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20" },
   "168worker": { label: "168worker", color: "bg-violet-500/10 text-violet-400 ring-1 ring-violet-500/20" },
   us168168: { label: "us168", color: "bg-orange-500/10 text-orange-400 ring-1 ring-orange-500/20" },
+  moonbbs: { label: "moonbbs", color: "bg-rose-500/10 text-rose-400 ring-1 ring-rose-500/20" },
 };
 
 type SortField = "title" | "category" | "author" | "date" | "found_at";

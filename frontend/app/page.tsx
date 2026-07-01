@@ -71,7 +71,7 @@ export default function Dashboard() {
       setCounts(c);
 
       const src: Record<string, number> = {};
-      for (const s of ["dadi360", "168worker", "us168168"]) {
+      for (const s of ["dadi360", "168worker", "us168168", "moonbbs"]) {
         const { count } = await db
           .from("listings")
           .select("*", { count: "exact", head: true })
@@ -128,6 +128,7 @@ export default function Dashboard() {
             <span className="text-emerald-400">● dadi360 {sourceCounts.dadi360 ?? "—"}</span>
             <span className="text-violet-400">● 168worker {sourceCounts["168worker"] ?? "—"}</span>
             <span className="text-orange-400">● us168 {sourceCounts["us168168"] ?? "—"}</span>
+            <span className="text-rose-400">● moonbbs {sourceCounts["moonbbs"] ?? "—"}</span>
           </div>
         </div>
       </div>
