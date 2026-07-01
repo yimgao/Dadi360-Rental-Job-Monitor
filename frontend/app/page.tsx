@@ -11,7 +11,8 @@ import {
   Clock,
   Activity,
   List,
-  RefreshCw,
+  Wrench,
+  Terminal,
 } from "lucide-react";
 
 interface Stat {
@@ -170,6 +171,34 @@ export default function Dashboard() {
         ))}
       </div>
 
+      {/* Quick Access */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <a
+          href="/config"
+          className="glow-card rounded-2xl border border-surface-800 bg-gradient-to-br from-amber-500/10 to-amber-600/5 p-5 flex items-center gap-4 transition-all duration-200 group"
+        >
+          <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Wrench size={20} className="text-amber-400" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-surface-200">Config</p>
+            <p className="text-xs text-surface-500 mt-0.5">Keywords, email, scrape settings</p>
+          </div>
+        </a>
+        <a
+          href="/logs"
+          className="glow-card rounded-2xl border border-surface-800 bg-gradient-to-br from-violet-500/10 to-violet-600/5 p-5 flex items-center gap-4 transition-all duration-200 group"
+        >
+          <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Terminal size={20} className="text-violet-400" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-surface-200">Logs</p>
+            <p className="text-xs text-surface-500 mt-0.5">Run history, errors, diagnostics</p>
+          </div>
+        </a>
+      </div>
+
       {/* Two-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Listings */}
@@ -285,18 +314,18 @@ function RecentRuns() {
   return (
     <div className="divide-y divide-surface-800/50">
       {runs.map((r) => (
-        <div key={r.id} className="px-5 py-3 flex items-center gap-3 text-sm">
+        <div key={r.id} className="px-5 py-3 flex items-center gap-2 text-sm">
           <div
-            className={`w-2 h-2 rounded-full ${
+            className={`w-2 h-2 shrink-0 rounded-full ${
               r.success ? "bg-brand-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]" : "bg-red-500"
             }`}
           />
-          <span className="font-mono text-xs text-surface-300 w-24">{r.category}</span>
-          <span className="text-surface-400">
+          <span className="font-mono text-xs text-surface-300 truncate max-w-28">{r.category}</span>
+          <span className="text-surface-400 shrink-0">
             {r.new_count} new
           </span>
-          <span className="text-surface-600 text-xs">{r.duration_s}s</span>
-          <span className="text-surface-600 text-xs ml-auto">
+          <span className="text-surface-600 text-xs shrink-0">{r.duration_s}s</span>
+          <span className="text-surface-600 text-xs ml-auto shrink-0">
             {new Date(r.started_at).toLocaleString("zh-CN")}
           </span>
         </div>

@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ListOrdered, Settings, ScrollText, Info } from "lucide-react";
+import { LayoutDashboard, ListOrdered, Settings, ScrollText, Info, Wrench, Terminal } from "lucide-react";
 
 const links = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/listings", label: "Listings", icon: ListOrdered },
-  { href: "/config", label: "Config", icon: Settings },
-  { href: "/logs", label: "Logs", icon: ScrollText },
+  { href: "/", label: "Dashboard", icon: LayoutDashboard, color: "text-brand-400" },
+  { href: "/listings", label: "Listings", icon: ListOrdered, color: "text-cyan-400" },
+  { href: "/config", label: "Config", icon: Wrench, color: "text-amber-400" },
+  { href: "/logs", label: "Logs", icon: Terminal, color: "text-violet-400" },
 ];
 
 export function Nav() {
@@ -41,12 +41,18 @@ export function Nav() {
                 href={l.href}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${
                   active
-                    ? "bg-brand-500/10 text-brand-400 ring-1 ring-brand-500/20"
-                    : "text-surface-400 hover:text-surface-200 hover:bg-surface-800/50"
+                    ? `${l.color} bg-surface-800/80 ring-1 ring-surface-700`
+                    : "text-surface-500 hover:text-surface-200 hover:bg-surface-800/40"
                 }`}
               >
-                <Icon size={14} />
+                <Icon size={14} className={active ? l.color : "text-surface-500"} />
                 {l.label}
+                {l.href === "/config" && !active && (
+                  <span className="text-[9px] px-1 py-0.5 rounded bg-amber-500/10 text-amber-500">⚙</span>
+                )}
+                {l.href === "/logs" && !active && (
+                  <span className="text-[9px] px-1 py-0.5 rounded bg-violet-500/10 text-violet-500">▸</span>
+                )}
               </Link>
             );
           })}
@@ -56,7 +62,7 @@ export function Nav() {
             href="/about"
             className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${
               path === "/about"
-                ? "bg-brand-500/10 text-brand-400 ring-1 ring-brand-500/20"
+                ? "text-brand-400 bg-surface-800/80 ring-1 ring-surface-700"
                 : "text-surface-500 hover:text-surface-300"
             }`}
           >
