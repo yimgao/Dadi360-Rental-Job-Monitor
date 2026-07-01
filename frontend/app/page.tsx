@@ -12,6 +12,7 @@ import {
   Activity,
   List,
 } from "lucide-react";
+import { TrendChart } from "./trend-chart";
 
 interface Stat {
   label: string;
@@ -162,6 +163,8 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+
+      <TrendChart />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <section className="rounded-2xl border border-surface-800 bg-surface-900/50 overflow-hidden">
