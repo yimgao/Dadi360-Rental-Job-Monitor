@@ -11,11 +11,11 @@ interface ConfigRow {
 }
 
 const FIELDS = [
-  { key: "rental_keywords", label: "Rental Keywords", hint: "Comma-separated Chinese terms" },
-  { key: "nail_keywords", label: "Nail Job Keywords", hint: "Comma-separated Chinese terms" },
-  { key: "restaurant_keywords", label: "Restaurant Keywords", hint: "Comma-separated Chinese terms" },
-  { key: "receiver_email", label: "Notification Email", hint: "Gmail address for alerts" },
-  { key: "scrape_interval_min", label: "Scrape Interval (min)", hint: "How often the cron job runs" },
+  { key: "rental_keywords", label: "租房关键词", hint: "逗号分隔" },
+  { key: "nail_keywords", label: "美甲关键词", hint: "逗号分隔" },
+  { key: "restaurant_keywords", label: "餐馆关键词", hint: "逗号分隔" },
+  { key: "receiver_email", label: "通知邮箱", hint: "Gmail 地址，用于接收告警" },
+  { key: "scrape_interval_min", label: "抓取间隔（分钟）", hint: "定时任务运行频率" },
 ];
 
 export default function ConfigPage() {
@@ -61,7 +61,7 @@ export default function ConfigPage() {
     }
     setDirty(false);
     setSaving(false);
-    setMsg("Saved");
+    setMsg("已保存");
     setTimeout(() => setMsg(""), 3000);
   };
 
@@ -73,9 +73,9 @@ export default function ConfigPage() {
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
               <Settings size={16} className="text-white" />
             </div>
-            Config
+            配置
           </h1>
-          <p className="text-sm text-surface-500 mt-1 ml-11">Scraper settings and keywords</p>
+          <p className="text-sm text-surface-500 mt-1 ml-11">抓取关键词和推送设置</p>
         </div>
         <button
           onClick={save}
@@ -87,7 +87,7 @@ export default function ConfigPage() {
           }`}
         >
           <Save size={14} />
-          {saving ? "Saving..." : "Save"}
+          {saving ? "保存中..." : "保存"}
         </button>
       </div>
 
@@ -119,7 +119,7 @@ export default function ConfigPage() {
 
       <details className="rounded-2xl border border-surface-800 group">
         <summary className="px-5 py-3 text-sm text-surface-500 cursor-pointer hover:text-surface-300 font-medium transition-colors">
-          Raw config table
+          原始配置数据
         </summary>
         <pre className="px-5 pb-4 text-xs text-surface-500 overflow-auto max-h-64">
           {JSON.stringify(rows, null, 2)}

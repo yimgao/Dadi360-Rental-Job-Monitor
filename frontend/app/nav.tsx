@@ -2,16 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ListOrdered, Info, Wrench, Terminal } from "lucide-react";
+import { LayoutDashboard, ListOrdered, Info } from "lucide-react";
 
 const mainLinks = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard, color: "text-brand-400" },
-  { href: "/listings", label: "Listings", icon: ListOrdered, color: "text-cyan-400" },
-];
-
-const hiddenLinks = [
-  { href: "/config", label: "Config", icon: Wrench, color: "text-amber-400" },
-  { href: "/logs", label: "Logs", icon: Terminal, color: "text-violet-400" },
+  { href: "/", label: "仪表盘", icon: LayoutDashboard, color: "text-brand-400" },
+  { href: "/listings", label: "数据列表", icon: ListOrdered, color: "text-cyan-400" },
 ];
 
 export function Nav() {
@@ -54,22 +49,14 @@ export function Nav() {
               </Link>
             );
           })}
-          {/* hidden pages: only visible when already on that page */}
-          {onHidden && hiddenLinks.map((l) => {
-            const active = path === l.href;
-            const Icon = l.icon;
-            if (!active) return null;
-            return (
-              <Link
-                key={l.href}
-                href={l.href}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${l.color} bg-surface-800/80 ring-1 ring-surface-700`}
-              >
-                <Icon size={14} className={l.color} />
-                {l.label}
-              </Link>
-            );
-          })}
+          {onHidden && (
+            <Link
+              href={path}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 text-amber-400 bg-surface-800/80 ring-1 ring-surface-700"
+            >
+              {path === "/config" ? "配置" : "日志"}
+            </Link>
+          )}
         </nav>
         <div className="ml-auto flex items-center gap-2">
           <Link
@@ -81,7 +68,7 @@ export function Nav() {
             }`}
           >
             <Info size={14} />
-            About
+            关于
           </Link>
         </div>
       </div>

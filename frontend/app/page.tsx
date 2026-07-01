@@ -22,19 +22,19 @@ interface Stat {
 
 const stats: Stat[] = [
   {
-    label: "Rental",
+    label: "租房",
     key: "rental",
     icon: <Home size={18} />,
     gradient: "from-cyan-500/20 to-cyan-600/5",
   },
   {
-    label: "Nail Jobs",
+    label: "美甲招聘",
     key: "nail_jobs",
     icon: <Building2 size={18} />,
     gradient: "from-pink-500/20 to-pink-600/5",
   },
   {
-    label: "Restaurant",
+    label: "餐馆招聘",
     key: "restaurant_jobs",
     icon: <UtensilsCrossed size={18} />,
     gradient: "from-amber-500/20 to-amber-600/5",
@@ -70,7 +70,6 @@ export default function Dashboard() {
       }
       setCounts(c);
 
-      // source breakdown per category
       const src: Record<string, number> = {};
       for (const s of ["dadi360", "168worker", "us168168"]) {
         const { count } = await db
@@ -110,22 +109,21 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      {/* Header */}
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
               <LayoutDashboard size={16} className="text-white" />
             </div>
-            Dashboard
+            概览
           </h1>
           <p className="text-sm text-surface-500 mt-1 ml-11">
-            c.dadi360.com monitoring overview
+            北美华人招聘·租房信息聚合监控
           </p>
         </div>
         <div className="text-right">
           <p className="text-3xl font-bold text-surface-100">{total}</p>
-          <p className="text-xs text-surface-500">total listings tracked</p>
+          <p className="text-xs text-surface-500">总记录数</p>
           <div className="flex gap-2 mt-1.5 justify-end text-[11px]">
             <span className="text-emerald-400">● dadi360 {sourceCounts.dadi360 ?? "—"}</span>
             <span className="text-violet-400">● 168worker {sourceCounts["168worker"] ?? "—"}</span>
@@ -134,7 +132,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stats.map((s) => (
           <div
@@ -144,9 +141,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-surface-400">
                 {s.icon}
-                <span className="text-sm font-semibold text-surface-300">
-                  {s.label}
-                </span>
+                <span className="text-sm font-semibold text-surface-300">{s.label}</span>
               </div>
               <ArrowUpRight size={14} className="text-surface-600" />
             </div>
@@ -160,43 +155,32 @@ export default function Dashboard() {
             <div className="flex items-center gap-1.5 text-xs text-surface-500">
               <Clock size={12} />
               <span>
-                {lastRun[s.key]
-                  ? lastRun[s.key]
-                  : "No runs yet"}
+                {lastRun[s.key] ? `上次更新: ${lastRun[s.key]}` : "暂无数据"}
               </span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Two-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Listings */}
         <section className="rounded-2xl border border-surface-800 bg-surface-900/50 overflow-hidden">
           <div className="px-5 py-3.5 border-b border-surface-800 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-surface-300 flex items-center gap-2">
               <List size={14} className="text-brand-400" />
-              Recent Listings
+              最新数据
             </h2>
-            <a
-              href="/listings"
-              className="text-xs text-brand-400 hover:text-brand-300 transition-colors"
-            >
-              View all
+            <a href="/listings" className="text-xs text-brand-400 hover:text-brand-300 transition-colors">
+              查看全部
             </a>
           </div>
           <div className="divide-y divide-surface-800/50">
             {loading && (
-              <p className="text-sm text-surface-600 p-5 text-center animate-pulse">
-                Loading...
-              </p>
+              <p className="text-sm text-surface-600 p-5 text-center animate-pulse">加载中...</p>
             )}
             {!loading && recent.length === 0 && (
-              <p className="text-sm text-surface-600 p-10 text-center">
-                No listings yet — waiting for the first scrape.
-              </p>
+              <p className="text-sm text-surface-600 p-10 text-center">暂无数据，等待首次抓取。</p>
             )}
-            {recent.map((r, i) => (
+            {recent.map((r) => (
               <a
                 key={r.id}
                 href={r.link}
@@ -215,11 +199,9 @@ export default function Dashboard() {
                           badgeColors[r.category] || "bg-surface-800 text-surface-400"
                         }`}
                       >
-                        {r.category}
+                        {r.category === "rental" ? "租房" : r.category === "nail_jobs" ? "美甲" : "餐馆"}
                       </span>
-                      {r.author && (
-                        <span className="text-xs text-surface-500">{r.author}</span>
-                      )}
+                      {r.author && <span className="text-xs text-surface-500">{r.author}</span>}
                       <span className="text-xs text-surface-600">{r.date}</span>
                     </div>
                   </div>
@@ -232,12 +214,11 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Recent Runs */}
         <section className="rounded-2xl border border-surface-800 bg-surface-900/50 overflow-hidden">
           <div className="px-5 py-3.5 border-b border-surface-800 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-surface-300 flex items-center gap-2">
               <Activity size={14} className="text-brand-400" />
-              Recent Runs
+              运行记录
             </h2>
           </div>
           <RecentRuns />
@@ -266,19 +247,11 @@ function RecentRuns() {
   }, []);
 
   if (loading) {
-    return (
-      <p className="text-sm text-surface-600 p-5 text-center animate-pulse">
-        Loading...
-      </p>
-    );
+    return <p className="text-sm text-surface-600 p-5 text-center animate-pulse">加载中...</p>;
   }
 
   if (runs.length === 0) {
-    return (
-      <p className="text-sm text-surface-600 p-10 text-center">
-        No runs yet.
-      </p>
-    );
+    return <p className="text-sm text-surface-600 p-10 text-center">暂无运行记录。</p>;
   }
 
   return (
@@ -291,10 +264,8 @@ function RecentRuns() {
             }`}
           />
           <span className="font-mono text-xs text-surface-300 truncate max-w-28">{r.category}</span>
-          <span className="text-surface-400 shrink-0">
-            {r.new_count} new
-          </span>
-          <span className="text-surface-600 text-xs shrink-0">{r.duration_s}s</span>
+          <span className="text-surface-400 shrink-0">{r.new_count} 条</span>
+          <span className="text-surface-600 text-xs shrink-0">{r.duration_s}秒</span>
           <span className="text-surface-600 text-xs ml-auto shrink-0">
             {new Date(r.started_at).toLocaleString("zh-CN")}
           </span>

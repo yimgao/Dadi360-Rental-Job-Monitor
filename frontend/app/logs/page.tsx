@@ -33,19 +33,19 @@ export default function LogsPage() {
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
               <ScrollText size={16} className="text-white" />
             </div>
-            Logs
+            运行日志
           </h1>
-          <p className="text-sm text-surface-500 mt-1 ml-11">Run history and errors</p>
+          <p className="text-sm text-surface-500 mt-1 ml-11">抓取历史与错误记录</p>
         </div>
         <div className="flex gap-3 text-sm">
           <span className="flex items-center gap-1.5 text-brand-400">
             <CheckCircle2 size={14} />
-            {successCount} success
+            {successCount} 次成功
           </span>
           {errorCount > 0 && (
             <span className="flex items-center gap-1.5 text-red-400">
               <AlertCircle size={14} />
-              {errorCount} failed
+              {errorCount} 次失败
             </span>
           )}
         </div>
@@ -61,9 +61,7 @@ export default function LogsPage() {
             </div>
           ))}
         {!loading && runs.length === 0 && (
-          <p className="text-sm text-surface-500 p-10 text-center">
-            No run logs yet.
-          </p>
+          <p className="text-sm text-surface-500 p-10 text-center">暂无运行日志。</p>
         )}
         {runs.map((r) => (
           <div key={r.id} className="px-5 py-3.5 flex items-start gap-3 hover:bg-surface-800/20 transition-colors">
@@ -76,7 +74,7 @@ export default function LogsPage() {
               <div className="flex items-center gap-3 text-sm">
                 <span className="font-mono text-xs text-surface-200 font-medium">{r.category}</span>
                 <span className="text-surface-500 text-xs">
-                  {r.new_count} new listings · {r.duration_s}s
+                  {r.new_count} 条 · {r.duration_s}秒
                 </span>
                 {r.error && (
                   <span className="text-red-400 text-xs truncate max-w-xs">{r.error}</span>

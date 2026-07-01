@@ -10,11 +10,10 @@ export default function AboutPage() {
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
             <Info size={16} className="text-white" />
           </div>
-          关于 / About
+          关于
         </h1>
       </div>
 
-      {/* Project Info */}
       <section className="rounded-2xl border border-surface-800 bg-surface-900/50 p-6 space-y-3">
         <h2 className="text-sm font-semibold text-surface-300 flex items-center gap-2">
           <Info size={14} className="text-brand-400" />
@@ -25,23 +24,20 @@ export default function AboutPage() {
           集中展示和搜索，方便求职者和租房者一站式浏览。
         </p>
         <div className="text-sm text-surface-500 space-y-1">
-          <p>数据来源 Data Sources:</p>
+          <p>数据来源：</p>
           <ul className="list-disc list-inside space-y-0.5 text-surface-400 ml-2">
             <li><a href="https://c.dadi360.com" target="_blank" rel="noopener noreferrer" className="text-brand-400 hover:underline">c.dadi360.com</a> — 纽约华人论坛</li>
             <li><a href="https://www.168worker.com" target="_blank" rel="noopener noreferrer" className="text-brand-400 hover:underline">168worker.com</a> — 华人找工网</li>
             <li><a href="https://www.us168168.com" target="_blank" rel="noopener noreferrer" className="text-brand-400 hover:underline">us168168.com</a> — 华人168</li>
           </ul>
         </div>
-        <p className="text-xs text-surface-600">
-          本项目为个人学习研究用途，非商业项目。
-        </p>
+        <p className="text-xs text-surface-600">本项目为个人学习研究用途，非商业项目。</p>
       </section>
 
-      {/* Disclaimer */}
       <section className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6 space-y-3">
         <h2 className="text-sm font-semibold text-amber-400 flex items-center gap-2">
           <Shield size={14} />
-          免责声明 Disclaimer
+          免责声明
         </h2>
         <div className="text-sm text-surface-400 leading-relaxed space-y-2">
           <p>
@@ -59,32 +55,26 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Copyright */}
       <section className="rounded-2xl border border-surface-800 bg-surface-900/50 p-6 space-y-3">
         <h2 className="text-sm font-semibold text-surface-300 flex items-center gap-2">
           <FileText size={14} className="text-brand-400" />
-          侵权联系 Copyright &amp; Takedown
+          侵权联系
         </h2>
         <div className="text-sm text-surface-400 leading-relaxed space-y-1">
           <p>如涉及版权或内容侵权，请通过以下方式联系我们：</p>
           <p className="mt-2 font-mono text-surface-300 bg-surface-800 px-3 py-1.5 rounded-lg inline-block text-xs">
             yimgao99@gmail.com
           </p>
-          <p className="mt-2 text-xs text-surface-500">
-            我们承诺在收到通知后 48 小时内响应并处理。
-          </p>
+          <p className="mt-2 text-xs text-surface-500">我们承诺在收到通知后 48 小时内响应并处理。</p>
         </div>
       </section>
 
-      {/* GitHub */}
       <section className="rounded-2xl border border-surface-800 bg-surface-900/50 p-6 space-y-3">
         <h2 className="text-sm font-semibold text-surface-300 flex items-center gap-2">
           <ExternalLink size={14} className="text-brand-400" />
-          开源 Open Source
+          开源
         </h2>
-        <p className="text-sm text-surface-400">
-          本项目开源在 GitHub：
-        </p>
+        <p className="text-sm text-surface-400">本项目开源在 GitHub：</p>
         <a
           href="https://github.com/yimgao/Dadi360-Rental-Job-Monitor"
           target="_blank"
