@@ -82,7 +82,6 @@ class MoonbbsScraper:
             return None
 
     def parse_page(self, html: str) -> list[dict[str, str]]:
-        """Parse forum thread list → matching listing dicts."""
         soup = BeautifulSoup(html, "html.parser")
         results: list[dict[str, str]] = []
 
@@ -94,15 +93,24 @@ class MoonbbsScraper:
             href = title_el.get("href", "")
             full_link = f"{DOMAIN}/{href}" if href.startswith("/") else f"{DOMAIN}/" + href
 
-            # Check keywords
             if self.keywords and not any(kw in title for kw in self.keywords):
                 continue
+
+            # Author
+            author_el = row.select_one("td.by cite a")
+            author = author_el.get_text(strip=True) if author_el else ""
+
+            # Date — from <span title="2026-6-29">
+            date_el = row.select_one("td.by em span")
+            date = date_el.get("title", "") if date_el else ""
+            if not date and date_el:
+                date = date_el.get_text(strip=True)
 
             results.append({
                 "title": title,
                 "link": full_link,
-                "author": "",
-                "date": "",
+                "author": author,
+                "date": date,
             })
 
         return results
