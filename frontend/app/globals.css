@@ -67,3 +67,12 @@ body {
 .glow-card:hover {
   border-color: var(--color-brand-600);
 }
+
+/* mobile table → card */
+@media (max-width: 640px) {
+  .resp-table thead { display: none; }
+  .resp-table tbody, .resp-table tr, .resp-table td { display: block; width: 100%; }
+  .resp-table tr { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-surface-800); }
+  .resp-table td { padding: 0.2rem 0; border: none !important; }
+  .resp-table td::before { content: attr(data-label); display: inline-block; width: 5rem; color: var(--color-surface-500); font-size: 0.75rem; }
+}
