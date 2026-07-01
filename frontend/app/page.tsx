@@ -11,8 +11,6 @@ import {
   Clock,
   Activity,
   List,
-  Wrench,
-  Terminal,
 } from "lucide-react";
 
 interface Stat {
@@ -169,34 +167,6 @@ export default function Dashboard() {
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Quick Access */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <a
-          href="/config"
-          className="glow-card rounded-2xl border border-surface-800 bg-gradient-to-br from-amber-500/10 to-amber-600/5 p-5 flex items-center gap-4 transition-all duration-200 group"
-        >
-          <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-            <Wrench size={20} className="text-amber-400" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-surface-200">Config</p>
-            <p className="text-xs text-surface-500 mt-0.5">Keywords, email, scrape settings</p>
-          </div>
-        </a>
-        <a
-          href="/logs"
-          className="glow-card rounded-2xl border border-surface-800 bg-gradient-to-br from-violet-500/10 to-violet-600/5 p-5 flex items-center gap-4 transition-all duration-200 group"
-        >
-          <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-            <Terminal size={20} className="text-violet-400" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-surface-200">Logs</p>
-            <p className="text-xs text-surface-500 mt-0.5">Run history, errors, diagnostics</p>
-          </div>
-        </a>
       </div>
 
       {/* Two-column layout */}

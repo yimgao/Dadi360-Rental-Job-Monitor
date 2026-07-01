@@ -2,17 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ListOrdered, Settings, ScrollText, Info, Wrench, Terminal } from "lucide-react";
+import { LayoutDashboard, ListOrdered, Info, Wrench, Terminal } from "lucide-react";
 
-const links = [
+const mainLinks = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard, color: "text-brand-400" },
   { href: "/listings", label: "Listings", icon: ListOrdered, color: "text-cyan-400" },
+];
+
+const hiddenLinks = [
   { href: "/config", label: "Config", icon: Wrench, color: "text-amber-400" },
   { href: "/logs", label: "Logs", icon: Terminal, color: "text-violet-400" },
 ];
 
 export function Nav() {
   const path = usePathname();
+  const onHidden = path === "/config" || path === "/logs";
 
   return (
     <header className="sticky top-0 z-50 border-b border-surface-800 bg-surface-950/80 backdrop-blur-xl">
@@ -32,7 +36,7 @@ export function Nav() {
           </div>
         </Link>
         <nav className="flex gap-1">
-          {links.map((l) => {
+          {mainLinks.map((l) => {
             const active = path === l.href;
             const Icon = l.icon;
             return (
@@ -47,12 +51,22 @@ export function Nav() {
               >
                 <Icon size={14} className={active ? l.color : "text-surface-500"} />
                 {l.label}
-                {l.href === "/config" && !active && (
-                  <span className="text-[9px] px-1 py-0.5 rounded bg-amber-500/10 text-amber-500">⚙</span>
-                )}
-                {l.href === "/logs" && !active && (
-                  <span className="text-[9px] px-1 py-0.5 rounded bg-violet-500/10 text-violet-500">▸</span>
-                )}
+              </Link>
+            );
+          })}
+          {/* hidden pages: only visible when already on that page */}
+          {onHidden && hiddenLinks.map((l) => {
+            const active = path === l.href;
+            const Icon = l.icon;
+            if (!active) return null;
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${l.color} bg-surface-800/80 ring-1 ring-surface-700`}
+              >
+                <Icon size={14} className={l.color} />
+                {l.label}
               </Link>
             );
           })}
