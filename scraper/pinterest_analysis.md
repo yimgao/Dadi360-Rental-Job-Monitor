@@ -26,3 +26,10 @@ Pinterest：用户在搜→广告也是答案→用户觉得有用
 - 广告逻辑：和Google搜索广告一样——用户在搜，你卖广告位
 
 ---
+
+
+## Section 2
+
+## Section 2: Financial Data
+
+## Section 2: Financial Data (2025 FY)

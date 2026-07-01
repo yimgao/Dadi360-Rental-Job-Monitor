@@ -27,11 +27,6 @@ export function TrendChart() {
 
     const load = async () => {
       // Get all listings, group by date + category on client side
-      // Supabase doesn't support GROUP BY in JS client easily
-      const days = 14;
-      const cutoff = new Date();
-      cutoff.setDate(cutoff.getDate() - days);
-
       const { data: rows } = await db
         .from("listings")
         .select("date, category")
@@ -81,9 +76,20 @@ export function TrendChart() {
         }
       }
 
+      // Find actual date range
+      const sortedKeys = Object.keys(dateMap).sort();
+      const firstDate = sortedKeys[0];
+      const lastDate = sortedKeys[sortedKeys.length - 1];
+      if (!firstDate || !lastDate) { setLoading(false); return; }
+
+      // Calculate days to show (between first and last, max 14, min 7)
+      const rangeDays = Math.max(7, Math.min(14,
+        Math.ceil((new Date(lastDate).getTime() - new Date(firstDate).getTime()) / 86400000) + 3
+      ));
+
       // Fill missing dates with 0
       const result: any[] = [];
-      for (let i = days - 1; i >= 0; i--) {
+      for (let i = rangeDays - 1; i >= 0; i--) {
         const d = new Date();
         d.setDate(d.getDate() - i);
         const key = d.toISOString().slice(0, 10);
